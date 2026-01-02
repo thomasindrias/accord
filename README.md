@@ -58,6 +58,39 @@ This generates a `manifest-types.ts` file with typed `Props`, `Events`, and `Cap
 
 ### 3) Mount the component in a host
 
+**React 19 (recommended)** — load the remote in `<head />` and render the custom
+element directly in JSX:
+
+```tsx
+// app/layout.tsx (Next.js example)
+import Script from "next/script";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <head>
+        <Script
+          src="https://cdn.example.com/csx-user-card.js"
+          strategy="beforeInteractive"
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+```tsx
+// app/page.tsx
+export default function Page() {
+  return <csx-user-card userId="user-123" />;
+}
+```
+
+The imperative `mount` API is still useful for non-React hosts, legacy apps, or
+cases where you need to dynamically swap containers or wire up host APIs/events
+at runtime.
+
 ```ts
 import { mount, registerRemote } from "@accord/host";
 
