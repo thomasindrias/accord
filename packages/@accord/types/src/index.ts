@@ -27,7 +27,8 @@ export const generateTypes = async ({ manifestPath, outDir, fileName }: Generate
   const outputFile = fileName ?? "manifest-types.ts";
   const relativeImport = path.relative(outDir, manifestPath).replace(/\\/g, "/");
   const manifestImport = relativeImport.startsWith(".") ? relativeImport : `./${relativeImport}`;
+  const manifestImportPath = manifestImport.replace(/\.(ts|tsx|js|jsx)$/u, "");
 
   await mkdir(outDir, { recursive: true });
-  await writeFile(path.join(outDir, outputFile), renderTypesFile(manifestImport));
+  await writeFile(path.join(outDir, outputFile), renderTypesFile(manifestImportPath));
 };
