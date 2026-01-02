@@ -1,0 +1,12 @@
+{
+  "name": "@accord/manifest",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.2",
+    "semver": "^7.6.3"
+  }
+}
