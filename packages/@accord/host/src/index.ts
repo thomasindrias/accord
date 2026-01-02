@@ -55,7 +55,6 @@ export type MountHandle = {
 
 type ScriptState = {
   promise: Promise<void>;
-  resolved: boolean;
 };
 
 const remoteRegistry = new Map<string, RemoteRegistration>();
@@ -73,7 +72,10 @@ export const loadRemote = async (id: string, timeoutMs = 10000): Promise<void> =
 
   const cached = scriptCache.get(registration.url);
   if (cached) {
-    return cached.promise;
+    return pTimeout(cached.promise, {
+      milliseconds: timeoutMs,
+      message: `Timed out loading remote \"${id}\" after ${timeoutMs}ms`
+    });
   }
 
   const scriptPromise = new Promise<void>((resolve, reject) => {
@@ -86,25 +88,23 @@ export const loadRemote = async (id: string, timeoutMs = 10000): Promise<void> =
     }
 
     script.onload = () => {
-      scriptCache.set(registration.url, { promise: Promise.resolve(), resolved: true });
       resolve();
     };
 
     script.onerror = () => {
       scriptCache.delete(registration.url);
+      script.remove();
       reject(new Error(`Failed to load remote script for \"${id}\"`));
     };
 
     document.head.appendChild(script);
   });
 
-  const wrapped = pTimeout(scriptPromise, {
+  scriptCache.set(registration.url, { promise: scriptPromise });
+  return pTimeout(scriptPromise, {
     milliseconds: timeoutMs,
     message: `Timed out loading remote \"${id}\" after ${timeoutMs}ms`
   });
-
-  scriptCache.set(registration.url, { promise: wrapped, resolved: false });
-  return wrapped;
 };
 
 const renderFallback = (
@@ -130,9 +130,16 @@ const applyProps = (element: HTMLElement, props: Record<string, unknown>) => {
       continue;
     }
 
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    if (typeof value === "string" || typeof value === "number") {
       element.setAttribute(key, String(value));
       (element as Record<string, unknown>)[key] = value;
+    } else if (typeof value === "boolean") {
+      (element as Record<string, unknown>)[key] = value;
+      if (value) {
+        element.setAttribute(key, "");
+      } else {
+        element.removeAttribute(key);
+      }
     } else {
       (element as Record<string, unknown>)[key] = value;
     }
