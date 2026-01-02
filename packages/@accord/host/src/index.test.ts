@@ -24,6 +24,12 @@ describe("host runtime", () => {
     expect(appendSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("throws when loading an unregistered remote", async () => {
+    await expect(host.loadRemote("missing-id")).rejects.toThrow(
+      'Remote "missing-id" is not registered'
+    );
+  });
+
   it("dedupes concurrent remote loads by url", async () => {
     host.registerRemote({ id: "remote-2", url: "https://example.com/shared.js" });
 
@@ -38,6 +44,27 @@ describe("host runtime", () => {
     await Promise.all([host.loadRemote("remote-2"), host.loadRemote("remote-2")]);
 
     expect(appendSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears cached script on load error", async () => {
+    host.registerRemote({ id: "id", url: "https://example.com/error.js" });
+
+    const appendSpy = vi
+      .spyOn(document.head, "appendChild")
+      .mockImplementation((node: Node) => {
+        const script = node as HTMLScriptElement;
+        script.onerror?.(new Event("error"));
+        return node;
+      });
+
+    await expect(host.loadRemote("id")).rejects.toThrow(
+      'Failed to load remote script for "id"'
+    );
+    await expect(host.loadRemote("id")).rejects.toThrow(
+      'Failed to load remote script for "id"'
+    );
+
+    expect(appendSpy).toHaveBeenCalledTimes(2);
   });
 
   it("mounts elements with props, host api, and event validation", async () => {
