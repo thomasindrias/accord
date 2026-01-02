@@ -56,6 +56,15 @@ accord-types --manifest ./src/csx-user-card.manifest.ts --outDir ./src/generated
 
 This generates a `manifest-types.ts` file with typed `Props`, `Events`, and `Capabilities`.
 
+You can also generate types from a hosted `manifest.json` that was produced using
+`getManifestJsonSchema` in `@accord/manifest`:
+
+```bash
+accord-types --manifestUrl https://cdn.example.com/csx-user-card/manifest.json --outDir ./src/generated
+```
+
+By default the remote workflow emits `manifest-types.d.ts`. Pass `--fileName` to override.
+
 ### 3) Mount the component in a host
 
 ```ts
