@@ -111,4 +111,30 @@ describe("host runtime", () => {
 
     expect(container.textContent).toBe("Failed to load");
   });
+
+  it("cleans up event listeners and removes element on unmount", async () => {
+    vi.spyOn(host, "loadRemote").mockResolvedValue();
+    const container = document.createElement("div");
+    const onEvent = vi.fn();
+
+    const { element, unmount } = await host.mount({
+      remoteId: "remote-5",
+      tagName: "demo-event",
+      container,
+      dev: true,
+      onEvent,
+      manifest: {
+        events: {
+          "user:selected": z.object({ id: z.string() })
+        }
+      }
+    });
+
+    unmount();
+
+    element.dispatchEvent(new CustomEvent("user:selected", { detail: { id: "ok" } }));
+
+    expect(onEvent).not.toHaveBeenCalled();
+    expect(container.contains(element)).toBe(false);
+  });
 });
