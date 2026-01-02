@@ -83,11 +83,14 @@ export const resolveCompatibility = (
   hostContractRange: string,
   componentContractVersion: string
 ): boolean => {
-  if (!semver.validRange(hostContractRange) || !semver.valid(componentContractVersion)) {
+  const hostRange = semver.validRange(hostContractRange);
+  const componentVersion = semver.coerce(componentContractVersion)?.version;
+
+  if (!hostRange || !componentVersion) {
     return false;
   }
 
-  return semver.satisfies(componentContractVersion, hostContractRange);
+  return semver.satisfies(componentVersion, hostRange);
 };
 
 export const getManifestJsonSchema = (manifest: Manifest) => {
