@@ -5,6 +5,7 @@ import * as host from "./index";
 describe("host runtime", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    host._resetForTest();
     document.head.innerHTML = "";
   });
 
@@ -41,7 +42,14 @@ describe("host runtime", () => {
   });
 
   it("mounts elements with props, host api, and event validation", async () => {
-    const loadSpy = vi.spyOn(host, "loadRemote").mockResolvedValue();
+    host.registerRemote({ id: "remote-3", url: "https://example.com/remote-3.js" });
+
+    vi.spyOn(document.head, "appendChild").mockImplementation((node: Node) => {
+      const script = node as HTMLScriptElement;
+      queueMicrotask(() => script.onload?.(new Event("load")));
+      return node;
+    });
+
     const container = document.createElement("div");
 
     const onEvent = vi.fn();
@@ -79,7 +87,6 @@ describe("host runtime", () => {
       }
     });
 
-    expect(loadSpy).toHaveBeenCalledWith("remote-3", 10000);
     expect(container.firstElementChild).toBe(element);
     expect(element.getAttribute("userId")).toBe("123");
     expect(element.getAttribute("count")).toBe("2");
@@ -97,7 +104,14 @@ describe("host runtime", () => {
   });
 
   it("renders fallback content on mount failure", async () => {
-    vi.spyOn(host, "loadRemote").mockRejectedValue(new Error("nope"));
+    host.registerRemote({ id: "remote-4", url: "https://example.com/remote-4.js" });
+
+    vi.spyOn(document.head, "appendChild").mockImplementation((node: Node) => {
+      const script = node as HTMLScriptElement;
+      queueMicrotask(() => script.onerror?.(new Event("error")));
+      return node;
+    });
+
     const container = document.createElement("div");
 
     await expect(
@@ -107,8 +121,38 @@ describe("host runtime", () => {
         container,
         fallback: "Failed to load"
       })
-    ).rejects.toThrow("nope");
+    ).rejects.toThrow('Failed to load remote script for "remote-4"');
 
     expect(container.textContent).toBe("Failed to load");
+  });
+
+  it("throws when loading an unregistered remote", async () => {
+    await expect(host.loadRemote("missing-id")).rejects.toThrow(
+      'Remote "missing-id" is not registered'
+    );
+  });
+
+  it("rejects and clears cache when script fails to load", async () => {
+    host.registerRemote({ id: "fail-remote", url: "https://example.com/fail.js" });
+
+    const appendSpy = vi
+      .spyOn(document.head, "appendChild")
+      .mockImplementation((node: Node) => {
+        const script = node as HTMLScriptElement;
+        // Trigger onerror asynchronously so scriptCache.set happens first
+        queueMicrotask(() => script.onerror?.(new Event("error")));
+        return node;
+      });
+
+    await expect(host.loadRemote("fail-remote")).rejects.toThrow(
+      'Failed to load remote script for "fail-remote"'
+    );
+
+    // Second call should trigger appendChild again (cache was cleared)
+    await expect(host.loadRemote("fail-remote")).rejects.toThrow(
+      'Failed to load remote script for "fail-remote"'
+    );
+
+    expect(appendSpy).toHaveBeenCalledTimes(2);
   });
 });

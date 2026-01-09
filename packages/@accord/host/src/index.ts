@@ -60,6 +60,12 @@ type ScriptState = {
 const remoteRegistry = new Map<string, RemoteRegistration>();
 const scriptCache = new Map<string, ScriptState>();
 
+/** @internal - for testing only */
+export const _resetForTest = () => {
+  remoteRegistry.clear();
+  scriptCache.clear();
+};
+
 export const registerRemote = (registration: RemoteRegistration) => {
   remoteRegistry.set(registration.id, registration);
 };
