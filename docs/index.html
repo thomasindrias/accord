@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accord - Contract-First Web Component Integration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accord: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    .nav-link.active {
+      background-color: rgb(14 165 233 / 0.1);
+      color: rgb(14 165 233);
+      border-left-color: rgb(14 165 233);
+    }
+    pre code.hljs {
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <!-- Mobile Header -->
+  <header class="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+    <div class="flex items-center justify-between px-4 py-3">
+      <h1 class="text-xl font-bold text-accord-600">Accord</h1>
+      <button id="menu-toggle" class="p-2 rounded-lg hover:bg-gray-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white border-r border-gray-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform">
+    <div class="p-6">
+      <h1 class="text-2xl font-bold text-accord-600 mb-2">Accord</h1>
+      <p class="text-sm text-gray-500 mb-6">Contract-First Web Components</p>
+
+      <nav class="space-y-1">
+        <a href="#introduction" class="nav-link block px-3 py-2 text-sm font-medium text-gray-700 border-l-2 border-transparent hover:bg-gray-50 hover:text-accord-600 transition-colors">Introduction</a>
+        <a href="#what-is-accord" class="nav-link block px-3 py-2 text-sm font-medium text-gray-700 border-l-2 border-transparent hover:bg-gray-50 hover:text-accord-600 transition-colors">What is Accord?</a>
+        <a href="#why-accord" class="nav-link block px-3 py-2 text-sm font-medium text-gray-700 border-l-2 border-transparent hover:bg-gray-50 hover:text-accord-600 transition-colors">Why Accord?</a>
+        <a href="#getting-started" class="nav-link block px-3 py-2 text-sm font-medium text-gray-700 border-l-2 border-transparent hover:bg-gray-50 hover:text-accord-600 transition-colors">Getting Started</a>
+        <a href="#usage" class="nav-link block px-3 py-2 text-sm font-medium text-gray-700 border-l-2 border-transparent hover:bg-gray-50 hover:text-accord-600 transition-colors">Usage</a>
+        <a href="#examples" class="nav-link block px-3 py-2 text-sm font-medium text-gray-700 border-l-2 border-transparent hover:bg-gray-50 hover:text-accord-600 transition-colors">Examples</a>
+        <a href="#api-reference" class="nav-link block px-3 py-2 text-sm font-medium text-gray-700 border-l-2 border-transparent hover:bg-gray-50 hover:text-accord-600 transition-colors">API Reference</a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Mobile Overlay -->
+  <div id="overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+  <!-- Main Content -->
+  <main class="lg:ml-64 pt-16 lg:pt-0">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+
+      <!-- Introduction -->
+      <section id="introduction" class="mb-16 scroll-mt-20">
+        <div class="bg-gradient-to-r from-accord-600 to-accord-800 rounded-2xl p-8 text-white mb-8">
+          <h1 class="text-4xl font-bold mb-4">Accord</h1>
+          <p class="text-xl text-accord-100">Contract-first integration layer for Web Component microfrontends</p>
+        </div>
+
+        <p class="text-lg text-gray-600 leading-relaxed">
+          Accord enables type-safe mounting of remote custom elements in host applications.
+          Define contracts using Zod schemas, generate TypeScript types automatically, and mount
+          remote components with full runtime validation.
+        </p>
+      </section>
+
+      <!-- What is Accord? -->
+      <section id="what-is-accord" class="mb-16 scroll-mt-20">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">What is Accord?</h2>
+
+        <p class="text-gray-600 mb-6">
+          Accord is a complete solution for building and integrating Web Component microfrontends.
+          It provides three core packages that work together:
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-8">
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-accord-600 mb-2">@accord/manifest</h3>
+            <p class="text-sm text-gray-600">Define contracts using Zod schemas. Validate manifests and check version compatibility.</p>
+          </div>
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-accord-600 mb-2">@accord/host</h3>
+            <p class="text-sm text-gray-600">Runtime for loading and mounting remote components with prop validation and event handling.</p>
+          </div>
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-accord-600 mb-2">@accord/types</h3>
+            <p class="text-sm text-gray-600">CLI tool that generates TypeScript types from manifests for type-safe integration.</p>
+          </div>
+        </div>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Key Concepts</h3>
+        <ul class="space-y-3 text-gray-600">
+          <li class="flex items-start">
+            <span class="text-accord-500 mr-2">&#x2713;</span>
+            <span><strong>Zod as single source of truth</strong> - Runtime validation, TypeScript types, and JSON schema all derive from Zod definitions</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-accord-500 mr-2">&#x2713;</span>
+            <span><strong>Host APIs via element property</strong> - Capabilities passed through <code class="bg-gray-100 px-1 rounded">element.host</code>, not window globals</span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-accord-500 mr-2">&#x2713;</span>
+            <span><strong>Semver contract negotiation</strong> - Version compatibility via <code class="bg-gray-100 px-1 rounded">semver.satisfies</code></span>
+          </li>
+          <li class="flex items-start">
+            <span class="text-accord-500 mr-2">&#x2713;</span>
+            <span><strong>Client-side only</strong> - No SSR for remotes, simplifying architecture</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Why Accord? -->
+      <section id="why-accord" class="mb-16 scroll-mt-20">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">Why Accord?</h2>
+
+        <p class="text-gray-600 mb-6">
+          Traditional Web Component integration has several pain points that Accord addresses:
+        </p>
+
+        <div class="space-y-4">
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Type Safety Gap</h3>
+            <p class="text-sm text-gray-600">Remote components loaded at runtime lack TypeScript types on the host. Accord generates types automatically from manifests.</p>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Contract Ambiguity</h3>
+            <p class="text-sm text-gray-600">No clear specification of what props, events, and capabilities a component needs. Accord defines explicit contracts using Zod schemas.</p>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Runtime Validation</h3>
+            <p class="text-sm text-gray-600">Props and events are passed without validation, leading to runtime errors. Accord validates in dev mode using the manifest schemas.</p>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Global Pollution</h3>
+            <p class="text-sm text-gray-600">Host services typically injected via <code class="bg-gray-100 px-1 rounded">window.*</code>, creating tight coupling. Accord passes capabilities through the element's <code class="bg-gray-100 px-1 rounded">host</code> property.</p>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 p-5">
+            <h3 class="font-semibold text-gray-900 mb-2">Version Negotiation</h3>
+            <p class="text-sm text-gray-600">No standard way to handle contract version compatibility. Accord uses semver-based version matching.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Getting Started -->
+      <section id="getting-started" class="mb-16 scroll-mt-20">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">Getting Started</h2>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Installation</h3>
+        <pre><code class="language-bash"># For remote component development
+npm install @accord/manifest zod
+
+# For host application
+npm install @accord/host @accord/types</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 1: Define a Manifest (Remote)</h3>
+        <p class="text-gray-600 mb-4">Create a manifest file in your remote component that defines the contract:</p>
+        <pre><code class="language-typescript">// csx-user-card.manifest.ts
+import { z } from "zod";
+import { defineManifest } from "@accord/manifest";
+
+export const manifest = defineManifest({
+  meta: {
+    name: "csx-user-card",
+    version: "1.0.0",
+    contractVersion: "1.0.0",
+    tagName: "csx-user-card"
+  },
+  props: z.object({
+    userId: z.string(),
+    readonly: z.boolean().default(false)
+  }),
+  events: {
+    "user:selected": z.object({ userId: z.string() }),
+    "user:deleted": z.object({
+      userId: z.string(),
+      reason: z.enum(["manual", "policy"])
+    })
+  },
+  capabilities: {
+    audit: z.object({
+      log: z.function()
+        .args(z.object({
+          action: z.string(),
+          entity: z.string(),
+          metadata: z.record(z.any()).optional()
+        }))
+        .returns(z.void())
+    }),
+    nav: z.object({
+      navigate: z.function()
+        .args(z.object({ to: z.string() }))
+        .returns(z.void())
+    })
+  },
+  hostRequirements: {
+    styling: "no-shadow-dom",
+    designTokens: true
+  }
+});</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 2: Build Your Remote Component</h3>
+        <p class="text-gray-600 mb-4">Implement your Web Component following the manifest contract:</p>
+        <pre><code class="language-typescript">// csx-user-card.ts
+import { LitElement, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
+
+@customElement("csx-user-card")
+export class CsxUserCard extends LitElement {
+  @property({ type: String }) userId = "";
+  @property({ type: Boolean }) readonly = false;
+
+  // Disable shadow DOM per hostRequirements
+  protected createRenderRoot() {
+    return this;
+  }
+
+  private handleSelect() {
+    this.dispatchEvent(
+      new CustomEvent("user:selected", {
+        detail: { userId: this.userId },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  render() {
+    return html`
+      &lt;div&gt;
+        &lt;strong&gt;User:&lt;/strong&gt; ${this.userId}
+        &lt;button ?disabled=${this.readonly} @click=${this.handleSelect}&gt;
+          Select
+        &lt;/button&gt;
+      &lt;/div&gt;
+    `;
+  }
+}</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 3: Generate Types (Host)</h3>
+        <p class="text-gray-600 mb-4">Use the CLI to generate TypeScript types from the manifest:</p>
+        <pre><code class="language-bash"># From local manifest file
+npx accord-types --manifest ./src/csx-user-card.manifest.ts --outDir ./src/generated
+
+# From remote manifest URL
+npx accord-types --manifestUrl https://cdn.example.com/manifest.json --outDir ./src/generated</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 4: Mount the Component (Host)</h3>
+        <p class="text-gray-600 mb-4">In React 19+, you can use custom elements directly in JSX:</p>
+        <pre><code class="language-typescript">// layout.tsx - Load the remote script
+import Script from "next/script";
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;head&gt;
+        &lt;Script
+          src="https://cdn.example.com/csx-user-card.js"
+          strategy="beforeInteractive"
+        /&gt;
+      &lt;/head&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}
+
+// page.tsx - Use the component
+export default function HomePage() {
+  return (
+    &lt;main&gt;
+      &lt;csx-user-card userId="user-123" readonly={false} /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+      </section>
+
+      <!-- Usage -->
+      <section id="usage" class="mb-16 scroll-mt-20">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">Usage</h2>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Manifest Definition</h3>
+        <p class="text-gray-600 mb-4">A manifest defines the complete contract between a remote component and its host:</p>
+
+        <div class="overflow-x-auto mb-8">
+          <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Section</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">meta</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Component name, version, contract version, and HTML tag name</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">props</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Zod schema for component input properties</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">events</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Record of event names to Zod schemas for payloads</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">capabilities</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Host APIs the component requires (optional)</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">hostRequirements</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Styling mode and design token requirements (optional)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Imperative Mounting</h3>
+        <p class="text-gray-600 mb-4">For non-React hosts or dynamic mounting scenarios:</p>
+        <pre><code class="language-typescript">import { registerRemote, mount } from "@accord/host";
+
+// Register the remote component
+registerRemote({
+  id: "csx-user-card",
+  url: "https://cdn.example.com/csx-user-card.js",
+  integrity: "sha384-..." // Optional SRI hash
+});
+
+// Mount the component
+const { element, unmount } = await mount({
+  remoteId: "csx-user-card",
+  tagName: "csx-user-card",
+  container: document.getElementById("slot"),
+
+  props: {
+    userId: "user-123",
+    readonly: false
+  },
+
+  // Pass host capabilities
+  hostApi: {
+    audit: {
+      log: (event) => console.log("audit", event)
+    },
+    nav: {
+      navigate: (input) => window.location.href = input.to
+    }
+  },
+
+  // Handle events
+  onEvent: (eventName, payload) => {
+    console.log("event", eventName, payload);
+  },
+
+  // Fallback on failure
+  fallback: "Component failed to load",
+
+  // Enable dev-time validation
+  dev: true,
+  manifest: { props: propsSchema, events: eventsSchema },
+
+  // Timeout
+  timeoutMs: 10000
+});
+
+// Cleanup when done
+unmount();</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Host API Capabilities</h3>
+        <p class="text-gray-600 mb-4">The host can provide these standard capabilities to remote components:</p>
+        <pre><code class="language-typescript">type HostApi = {
+  auth?: {
+    getToken: () => Promise&lt;string&gt;;
+  };
+  audit?: {
+    log: (event: { action: string; entity: string; metadata?: Record&lt;string, unknown&gt; }) => void;
+  };
+  nav?: {
+    navigate: (input: { to: string }) => void;
+  };
+  i18n?: {
+    t: (key: string, params?: Record&lt;string, string&gt;) => string;
+  };
+  theme?: {
+    tokens: () => Record&lt;string, string&gt;;
+  };
+  store?: {
+    subscribe: (listener: (value: unknown) => void) => () => void;
+    getSnapshot: () => unknown;
+  };
+};</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Type Generation CLI</h3>
+        <p class="text-gray-600 mb-4">The <code class="bg-gray-100 px-1 rounded">accord-types</code> CLI supports two workflows:</p>
+        <pre><code class="language-bash"># From local TypeScript manifest
+accord-types --manifest ./src/component.manifest.ts --outDir ./src/generated
+
+# From remote JSON manifest
+accord-types --manifestUrl https://cdn.example.com/manifest.json --outDir ./src/generated
+
+# With custom output filename
+accord-types --manifest ./src/component.manifest.ts --outDir ./src/generated --fileName types.ts</code></pre>
+      </section>
+
+      <!-- Examples -->
+      <section id="examples" class="mb-16 scroll-mt-20">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">Examples</h2>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Complete Remote Component (Lit)</h3>
+        <pre><code class="language-typescript">// csx-user-card.manifest.ts
+import { z } from "zod";
+import { defineManifest } from "@accord/manifest";
+
+export const manifest = defineManifest({
+  meta: {
+    name: "csx-user-card",
+    version: "1.0.0",
+    contractVersion: "1.0.0",
+    tagName: "csx-user-card"
+  },
+  props: z.object({
+    userId: z.string(),
+    readonly: z.boolean().default(false)
+  }),
+  events: {
+    "user:selected": z.object({ userId: z.string() }),
+    "user:deleted": z.object({
+      userId: z.string(),
+      reason: z.enum(["manual", "policy"])
+    })
+  },
+  capabilities: {
+    audit: z.object({
+      log: z.function()
+        .args(z.object({
+          action: z.string(),
+          entity: z.string(),
+          metadata: z.record(z.any()).optional()
+        }))
+        .returns(z.void())
+    })
+  },
+  hostRequirements: {
+    styling: "no-shadow-dom",
+    designTokens: true
+  }
+});
+
+// csx-user-card.ts
+import { LitElement, html, css } from "lit";
+import { customElement, property } from "lit/decorators.js";
+
+@customElement("csx-user-card")
+export class CsxUserCard extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      font-family: sans-serif;
+      border: 1px solid #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    button { margin-top: 12px; }
+  `;
+
+  @property({ type: String }) userId = "";
+  @property({ type: Boolean }) readonly = false;
+
+  protected createRenderRoot() {
+    return this; // No shadow DOM
+  }
+
+  private handleSelect() {
+    // Access host capabilities
+    (this as any).host?.audit?.log({
+      action: "select",
+      entity: "user",
+      metadata: { userId: this.userId }
+    });
+
+    this.dispatchEvent(
+      new CustomEvent("user:selected", {
+        detail: { userId: this.userId },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  private handleDelete() {
+    this.dispatchEvent(
+      new CustomEvent("user:deleted", {
+        detail: { userId: this.userId, reason: "manual" },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  render() {
+    return html`
+      &lt;div&gt;
+        &lt;strong&gt;User:&lt;/strong&gt; ${this.userId}
+        &lt;div&gt;
+          &lt;button ?disabled=${this.readonly} @click=${this.handleSelect}&gt;
+            Select
+          &lt;/button&gt;
+          &lt;button ?disabled=${this.readonly} @click=${this.handleDelete}&gt;
+            Delete
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    `;
+  }
+}</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Next.js Host Application</h3>
+        <pre><code class="language-typescript">// app/layout.tsx
+import Script from "next/script";
+
+export default function RootLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;head&gt;
+        &lt;Script
+          src="http://localhost:3001/csx-user-card.js"
+          strategy="beforeInteractive"
+        /&gt;
+      &lt;/head&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}
+
+// app/page.tsx
+export default function HomePage() {
+  return (
+    &lt;main style={{ padding: "2rem", fontFamily: "sans-serif" }}&gt;
+      &lt;h1&gt;Accord Next.js Host&lt;/h1&gt;
+      &lt;csx-user-card userId="user-123" readonly={false} /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Validate Manifest at Build Time</h3>
+        <pre><code class="language-typescript">import { validateManifest } from "@accord/manifest";
+import { manifest } from "./csx-user-card.manifest";
+
+const result = validateManifest(manifest);
+
+if (!result.success) {
+  console.error("Manifest validation failed:", result.errors);
+  process.exit(1);
+}
+
+console.log("Manifest is valid!");</code></pre>
+
+        <h3 class="text-xl font-semibold text-gray-900 mt-8 mb-4">Check Version Compatibility</h3>
+        <pre><code class="language-typescript">import { resolveCompatibility } from "@accord/manifest";
+
+// Host requires contract version ^1.0.0
+const hostContractRange = "^1.0.0";
+
+// Component provides contract version 1.2.0
+const componentContractVersion = "1.2.0";
+
+const isCompatible = resolveCompatibility(
+  hostContractRange,
+  componentContractVersion
+);
+
+console.log("Compatible:", isCompatible); // true</code></pre>
+      </section>
+
+      <!-- API Reference -->
+      <section id="api-reference" class="mb-16 scroll-mt-20">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">API Reference</h2>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">@accord/manifest</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Export</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Type</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">defineManifest(manifest)</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Function</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Type-safe manifest definition helper (identity function)</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">validateManifest(manifest)</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Function</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Validates manifest structure, returns { success, errors }</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">resolveCompatibility(hostRange, componentVersion)</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Function</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Checks semver compatibility between host and component</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">getManifestJsonSchema(manifest)</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Function</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Converts manifest to JSON Schema for remote hosting</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">contractMetaSchema</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Zod Schema</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Schema for validating the meta section</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">hostRequirementsSchema</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Zod Schema</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Schema for validating host requirements</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">@accord/host</h3>
+        <div class="overflow-x-auto mb-8">
+          <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Export</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Type</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">registerRemote(registration)</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Function</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Register a remote component by ID and URL</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">loadRemote(id, timeoutMs?)</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Async Function</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Load remote script with deduplication and caching</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">mount(options)</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Async Function</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Mount component, returns { element, unmount }</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">RemoteRegistration</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Type</td>
+                <td class="px-4 py-3 text-sm text-gray-600">{ id, url, integrity?, versionRange? }</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">MountOptions</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Type</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Options for the mount() function</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">MountHandle</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Type</td>
+                <td class="px-4 py-3 text-sm text-gray-600">{ element, unmount } returned by mount()</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">HostApi</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Type</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Standard host capabilities interface</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">@accord/types CLI</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Option</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Description</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">--manifest &lt;path&gt;</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Path to local TypeScript manifest file</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">--manifestUrl &lt;url&gt;</td>
+                <td class="px-4 py-3 text-sm text-gray-600">URL to remote manifest.json</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">--outDir &lt;path&gt;</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Output directory for generated types (required)</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-accord-600">--fileName &lt;name&gt;</td>
+                <td class="px-4 py-3 text-sm text-gray-600">Custom output filename (optional)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="border-t border-gray-200 pt-8 text-center text-gray-500 text-sm">
+        <p>Accord - Contract-first Web Component integration</p>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    // Initialize syntax highlighting
+    hljs.highlightAll();
+
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    });
+
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 1024) {
+          sidebar.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
+        }
+      });
+    });
+
+    // Active section highlighting
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    const observerOptions = {
+      rootMargin: '-20% 0px -80% 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
