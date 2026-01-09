@@ -1,6 +1,7 @@
 {
   "name": "accord",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "packages/@accord/*",
     "examples/*"
